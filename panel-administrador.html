@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador — Red Comercios</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --azul:       #1A2E4A;
+  --azul-mid:   #2A4A72;
+  --dorado:     #C9922A;
+  --dorado-cl:  #F0C96B;
+  --crema:      #F7F3EC;
+  --bg:         #EDEAE3;
+  --blanco:     #FFFFFF;
+  --gris:       #6B7280;
+  --gris-cl:    #D1CCC2;
+  --verde:      #2E7D5E;
+  --verde-cl:   #D1EDE5;
+  --rojo:       #C0392B;
+  --rojo-cl:    #FADBD8;
+  --naranja:    #D4691E;
+  --naranja-cl: #FAE3D0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--azul); min-height: 100vh; }
+
+/* ── Layout ── */
+.layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px; background: var(--azul);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; flex-shrink: 0;
+}
+.sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo-sup { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dorado-cl); font-weight: 600; margin-bottom: 5px; }
+.logo-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--blanco); line-height: 1.2; }
+.admin-chip {
+  display: inline-block; margin-top: 8px;
+  background: rgba(201,146,42,0.2); border: 1px solid var(--dorado);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 10px; font-weight: 700; color: var(--dorado-cl);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.nav { padding: 16px 12px; flex: 1; }
+.nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 10px 12px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55);
+  cursor: pointer; transition: all 0.15s; margin-bottom: 2px;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: rgba(255,255,255,0.07); color: var(--blanco); }
+.nav-item.active { background: rgba(201,146,42,0.18); color: var(--dorado-cl); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-bottom { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+.user-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; }
+.user-avatar { width: 34px; height: 34px; background: var(--dorado); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: var(--blanco); }
+.user-info p { font-size: 13px; font-weight: 600; color: var(--blanco); }
+.user-info span { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* ── Main ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { background: var(--blanco); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gris-cl); }
+.topbar-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.tab-btn {
+  padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.15s;
+}
+.tab-btn.on  { background: var(--azul); color: var(--blanco); }
+.tab-btn.off { background: var(--bg); color: var(--gris); }
+.content { padding: 28px 32px; overflow-y: auto; flex: 1; }
+
+/* ── Stats ── */
+.stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--blanco); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; }
+.stat-card.hl { background: var(--azul); }
+.stat-card.gold { background: linear-gradient(135deg, var(--dorado), #b5811f); }
+.stat-ey { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris); margin-bottom: 6px; }
+.stat-card.hl  .stat-ey  { color: rgba(255,255,255,0.45); }
+.stat-card.gold .stat-ey { color: rgba(255,255,255,0.7); }
+.stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--azul); line-height: 1; }
+.stat-card.hl   .stat-val { color: var(--blanco); }
+.stat-card.gold .stat-val { color: var(--blanco); }
+.stat-sub { font-size: 11px; color: var(--gris); margin-top: 4px; }
+.stat-card.hl   .stat-sub { color: rgba(255,255,255,0.4); }
+.stat-card.gold .stat-sub { color: rgba(255,255,255,0.7); }
+.stat-acc { position: absolute; bottom: -8px; right: -6px; font-size: 52px; opacity: 0.08; }
+
+/* ── Tres columnas ── */
+.three-col { display: grid; grid-template-columns: 1fr 1fr 300px; gap: 18px; margin-bottom: 18px; }
+.two-col   { display: grid; grid-template-columns: 1fr 300px; gap: 18px; }
+
+/* ── Panel base ── */
+.panel { background: var(--blanco); border-radius: 16px; overflow: hidden; }
+.panel-header { padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F0EAE0; }
+.panel-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+.panel-action { font-size: 12px; color: var(--dorado); font-weight: 600; cursor: pointer; background: none; border: none; }
+
+/* ── Tabla comercios ── */
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 9px 22px; text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris); background: #FAFAF8; border-bottom: 1px solid #F0EAE0; }
+tbody tr { border-bottom: 1px solid #F7F3EC; transition: background 0.12s; cursor: pointer; }
+tbody tr:hover { background: #FDFCFA; }
+tbody tr:last-child { border-bottom: none; }
+td { padding: 10px 22px; font-size: 13px; }
+.com-name { font-weight: 600; }
+.com-cat  { font-size: 11px; color: var(--gris); }
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.badge.activo   { background: var(--verde-cl); color: var(--verde); }
+.badge.pausado  { background: var(--naranja-cl); color: var(--naranja); }
+.badge.inactivo { background: var(--rojo-cl); color: var(--rojo); }
+.nums-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; }
+.bar-wrap { width: 80px; height: 6px; background: #EDE8DF; border-radius: 3px; }
+.bar-fill { height: 100%; border-radius: 3px; background: var(--dorado); }
+
+/* ── Sorteo panel ── */
+.sorteo-box {
+  background: linear-gradient(145deg, var(--azul), #1e3a5f);
+  border-radius: 16px; padding: 22px;
+  position: relative; overflow: hidden;
+}
+.sorteo-box::before { content: '★'; position: absolute; font-size: 140px; color: rgba(201,146,42,0.07); bottom: -30px; right: -20px; line-height: 1; }
+.s-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+.s-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--blanco); margin-bottom: 16px; }
+.cd-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+.cd-unit { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 4px; text-align: center; }
+.cd-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--dorado-cl); display: block; }
+.cd-lbl { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; text-transform: uppercase; }
+.s-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.s-stat { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 12px; }
+.s-stat-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--blanco); }
+.s-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.btn-sorteo {
+  width: 100%; padding: 13px;
+  background: var(--dorado); border: none; border-radius: 12px;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--blanco);
+  cursor: pointer; transition: background 0.15s; position: relative; z-index: 1;
+}
+.btn-sorteo:hover { background: #b5811f; }
+
+/* ── Distribución por comercio ── */
+.dist-list { padding: 8px 0; }
+.dist-item { padding: 10px 22px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #F7F3EC; }
+.dist-item:last-child { border-bottom: none; }
+.dist-rank { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: var(--gris-cl); width: 20px; }
+.dist-info { flex: 1; }
+.dist-name { font-size: 13px; font-weight: 600; }
+.dist-bar-wrap { width: 100%; height: 5px; background: #EDE8DF; border-radius: 3px; margin-top: 5px; }
+.dist-bar { height: 100%; border-radius: 3px; }
+.dist-num { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--azul); }
+
+/* ── Actividad global ── */
+.act-item { display: flex; align-items: center; gap: 12px; padding: 11px 22px; border-bottom: 1px solid #F7F3EC; }
+.act-item:last-child { border-bottom: none; }
+.act-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-compra  { background: var(--verde); }
+.dot-nuevo   { background: var(--dorado); }
+.dot-sistema { background: var(--azul-mid); }
+.act-text { flex: 1; font-size: 12px; color: var(--azul); line-height: 1.4; }
+.act-text strong { font-weight: 600; }
+.act-time { font-size: 11px; color: var(--gris); flex-shrink: 0; }
+
+/* ── Alta comercio btn ── */
+.btn-add {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 10px;
+  background: var(--azul); color: var(--blanco);
+  border: none; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: background 0.15s;
+}
+.btn-add:hover { background: var(--azul-mid); }
+
+/* ── Modal sorteo ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,46,74,0.75); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--blanco); border-radius: 24px; padding: 36px 32px; text-align: center; max-width: 380px; width: 90%; animation: mIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes mIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-icon { font-size: 56px; margin-bottom: 12px; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.modal-sub { font-size: 14px; color: var(--gris); margin-bottom: 28px; line-height: 1.5; }
+
+/* Bombo animado */
+.bombo-wrap { margin: 0 auto 24px; width: 140px; height: 140px; position: relative; }
+.bombo-circle {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--azul), var(--azul-mid));
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.bombo-circle.spin { animation: bomboSpin 0.6s ease-in-out; }
+@keyframes bomboSpin { 0%,100%{transform:rotate(0)} 50%{transform:rotate(360deg)} }
+.bombo-num { font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800; color: var(--blanco); }
+.bombo-num.reveal { animation: numPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes numPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+
+.winner-box { background: var(--crema); border-radius: 14px; padding: 16px; margin-bottom: 22px; display: none; }
+.winner-box.show { display: block; }
+.winner-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris); margin-bottom: 4px; }
+.winner-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--azul); }
+.winner-det { font-size: 13px; color: var(--gris); margin-top: 2px; }
+
+.modal-btns { display: flex; gap: 10px; }
+.mbt-p { flex:1; background: var(--azul); color: var(--blanco); border: none; border-radius: 12px; padding: 13px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+.mbt-s { flex:1; background: var(--bg); color: var(--azul); border: none; border-radius: 12px; padding: 13px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+/* ── Modal alta comercio ── */
+.modal2 { background: var(--blanco); border-radius: 24px; padding: 32px; max-width: 420px; width: 90%; animation: mIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
+.modal2-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--gris); }
+.field input, .field select {
+  background: var(--bg); border: 1.5px solid var(--gris-cl);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 14px; font-family: 'Inter', sans-serif; color: var(--azul); outline: none;
+}
+.field input:focus, .field select:focus { border-color: var(--dorado); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-sup">✦ Red Comercios Tandil</div>
+      <div class="logo-title">Panel<br>Administrador</div>
+      <div class="admin-chip">Admin</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">General</div>
+      <button class="nav-item active"><span class="nav-icon">📊</span> Resumen red</button>
+      <button class="nav-item"><span class="nav-icon">🏪</span> Comercios</button>
+      <button class="nav-item"><span class="nav-icon">👥</span> Todos los clientes</button>
+      <button class="nav-item"><span class="nav-icon">🔢</span> Números emitidos</button>
+      <div class="nav-section">Sorteo</div>
+      <button class="nav-item" onclick="openSorteo()"><span class="nav-icon">🎰</span> Ejecutar sorteo</button>
+      <button class="nav-item"><span class="nav-icon">🏆</span> Historial ganadores</button>
+      <div class="nav-section">Configuración</div>
+      <button class="nav-item"><span class="nav-icon">⚙️</span> Reglas del sorteo</button>
+      <button class="nav-item"><span class="nav-icon">📣</span> Notificaciones</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="user-avatar">AD</div>
+        <div class="user-info">
+          <p>Administrador</p>
+          <span>Red Tandil</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Resumen de la red</div>
+      <div class="topbar-right">
+        <button class="tab-btn on">Julio 2026</button>
+        <button class="tab-btn off">Junio</button>
+        <button class="tab-btn off">Mayo</button>
+        <button class="btn-add" onclick="openAlta()">+ Nuevo comercio</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats globales -->
+      <div class="stats-grid">
+        <div class="stat-card hl">
+          <div class="stat-ey">Comercios activos</div>
+          <div class="stat-val">18</div>
+          <div class="stat-sub">de 22 adheridos</div>
+          <div class="stat-acc">🏪</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ey">Números totales</div>
+          <div class="stat-val">1.204</div>
+          <div class="stat-sub">emitidos este mes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ey">Clientes únicos</div>
+          <div class="stat-val">487</div>
+          <div class="stat-sub">en toda la red</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ey">Ventas totales red</div>
+          <div class="stat-val">$2,4M</div>
+          <div class="stat-sub">acumulado julio</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-ey">Premio del mes</div>
+          <div class="stat-val">$50.000</div>
+          <div class="stat-sub">Sorteo 31 de julio</div>
+          <div class="stat-acc">🏆</div>
+        </div>
+      </div>
+
+      <!-- Fila 1 -->
+      <div class="three-col">
+
+        <!-- Tabla comercios -->
+        <div class="panel" style="grid-column: span 2;">
+          <div class="panel-header">
+            <div class="panel-title">Comercios adheridos</div>
+            <button class="panel-action" onclick="openAlta()">+ Agregar comercio</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Comercio</th>
+                <th>Estado</th>
+                <th>Números</th>
+                <th>Participación</th>
+                <th>Ventas mes</th>
+                <th>Clientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="com-name">Ferretería El Tornillo</div><div class="com-cat">Ferretería · ID #0042</div></td>
+                <td><span class="badge activo">Activo</span></td>
+                <td><span class="nums-val">148</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div></td>
+                <td>$312.000</td><td>64</td>
+              </tr>
+              <tr>
+                <td><div class="com-name">Farmacia Central</div><div class="com-cat">Farmacia · ID #0007</div></td>
+                <td><span class="badge activo">Activo</span></td>
+                <td><span class="nums-val">134</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:90%"></div></div></td>
+                <td>$284.000</td><td>58</td>
+              </tr>
+              <tr>
+                <td><div class="com-name">Supermercado Díaz</div><div class="com-cat">Supermercado · ID #0003</div></td>
+                <td><span class="badge activo">Activo</span></td>
+                <td><span class="nums-val">121</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:82%"></div></div></td>
+                <td>$256.000</td><td>52</td>
+              </tr>
+              <tr>
+                <td><div class="com-name">Librería El Saber</div><div class="com-cat">Librería · ID #0015</div></td>
+                <td><span class="badge activo">Activo</span></td>
+                <td><span class="nums-val">98</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:66%"></div></div></td>
+                <td>$198.000</td><td>43</td>
+              </tr>
+              <tr>
+                <td><div class="com-name">Veterinaria Patas</div><div class="com-cat">Veterinaria · ID #0019</div></td>
+                <td><span class="badge activo">Activo</span></td>
+                <td><span class="nums-val">87</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:59%"></div></div></td>
+                <td>$174.000</td><td>38</td>
+              </tr>
+              <tr>
+                <td><div class="com-name">Ropa Sport Tandil</div><div class="com-cat">Indumentaria · ID #0011</div></td>
+                <td><span class="badge pausado">Pausado</span></td>
+                <td><span class="nums-val" style="color:var(--gris)">12</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:8%;background:var(--gris-cl)"></div></div></td>
+                <td style="color:var(--gris)">$24.000</td><td style="color:var(--gris)">8</td>
+              </tr>
+              <tr>
+                <td><div class="com-name">Óptica Visión</div><div class="com-cat">Óptica · ID #0028</div></td>
+                <td><span class="badge inactivo">Inactivo</span></td>
+                <td><span class="nums-val" style="color:var(--gris-cl)">0</span></td>
+                <td><div class="bar-wrap"><div class="bar-fill" style="width:0%"></div></div></td>
+                <td style="color:var(--gris-cl)">—</td><td style="color:var(--gris-cl)">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sorteo -->
+        <div class="sorteo-box">
+          <div class="s-label">Próximo sorteo</div>
+          <div class="s-title">Julio 2026<br>31 de julio</div>
+          <div class="cd-grid">
+            <div class="cd-unit"><span class="cd-num" id="cd-d">02</span><span class="cd-lbl">Días</span></div>
+            <div class="cd-unit"><span class="cd-num" id="cd-h">14</span><span class="cd-lbl">Horas</span></div>
+            <div class="cd-unit"><span class="cd-num" id="cd-m">38</span><span class="cd-lbl">Min</span></div>
+          </div>
+          <div class="s-stats">
+            <div class="s-stat"><div class="s-stat-val">1.204</div><div class="s-stat-lbl">Números en juego</div></div>
+            <div class="s-stat"><div class="s-stat-val">18</div><div class="s-stat-lbl">Comercios part.</div></div>
+          </div>
+          <button class="btn-sorteo" onclick="openSorteo()">🎰 Ejecutar sorteo ahora</button>
+        </div>
+      </div>
+
+      <!-- Fila 2 -->
+      <div class="two-col">
+
+        <!-- Actividad global -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Actividad en tiempo real</div>
+            <span style="font-size:11px;color:var(--verde);font-weight:600;">● En vivo</span>
+          </div>
+          <div>
+            <div class="act-item"><div class="act-dot dot-compra"></div><div class="act-text"><strong>María González</strong> compró en Ferretería El Tornillo · 2 números asignados</div><div class="act-time">14:32</div></div>
+            <div class="act-item"><div class="act-dot dot-nuevo"></div><div class="act-text"><strong>Nuevo cliente:</strong> Sofía Herrera se registró desde Farmacia Central</div><div class="act-time">13:58</div></div>
+            <div class="act-item"><div class="act-dot dot-compra"></div><div class="act-text"><strong>Carlos Pérez</strong> compró en Supermercado Díaz · 1 número asignado</div><div class="act-time">13:41</div></div>
+            <div class="act-item"><div class="act-dot dot-compra"></div><div class="act-text"><strong>Laura Ríos</strong> compró en Librería El Saber · 4 números asignados</div><div class="act-time">12:20</div></div>
+            <div class="act-item"><div class="act-dot dot-sistema"></div><div class="act-text"><strong>Sistema:</strong> Ropa Sport Tandil pausó su participación este mes</div><div class="act-time">10:05</div></div>
+            <div class="act-item"><div class="act-dot dot-compra"></div><div class="act-text"><strong>Roberto Sosa</strong> compró en Veterinaria Patas · 1 número asignado</div><div class="act-time">09:44</div></div>
+            <div class="act-item"><div class="act-dot dot-nuevo"></div><div class="act-text"><strong>Nuevo comercio:</strong> Panadería La Espiga confirmó adhesión</div><div class="act-time">Ayer</div></div>
+          </div>
+        </div>
+
+        <!-- Ranking distribución -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Top comercios del mes</div>
+          </div>
+          <div class="dist-list">
+            <div class="dist-item">
+              <div class="dist-rank">1</div>
+              <div class="dist-info">
+                <div class="dist-name">Ferretería El Tornillo</div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="width:100%;background:var(--dorado)"></div></div>
+              </div>
+              <div class="dist-num">148</div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-rank">2</div>
+              <div class="dist-info">
+                <div class="dist-name">Farmacia Central</div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="width:90%;background:var(--azul-mid)"></div></div>
+              </div>
+              <div class="dist-num">134</div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-rank">3</div>
+              <div class="dist-info">
+                <div class="dist-name">Supermercado Díaz</div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="width:82%;background:var(--azul-mid)"></div></div>
+              </div>
+              <div class="dist-num">121</div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-rank">4</div>
+              <div class="dist-info">
+                <div class="dist-name">Librería El Saber</div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="width:66%;background:var(--azul-mid)"></div></div>
+              </div>
+              <div class="dist-num">98</div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-rank">5</div>
+              <div class="dist-info">
+                <div class="dist-name">Veterinaria Patas</div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="width:59%;background:var(--azul-mid)"></div></div>
+              </div>
+              <div class="dist-num">87</div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-rank">6</div>
+              <div class="dist-info">
+                <div class="dist-name">Otros 13 comercios</div>
+                <div class="dist-bar-wrap"><div class="dist-bar" style="width:45%;background:var(--gris-cl)"></div></div>
+              </div>
+              <div class="dist-num">616</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ── Modal Sorteo ── -->
+<div class="modal-overlay" id="modalSorteo" onclick="closeSorteoOut(event)">
+  <div class="modal">
+    <div class="modal-icon">🎰</div>
+    <div class="modal-title">Ejecutar sorteo</div>
+    <div class="modal-sub" id="sorteo-sub">Se seleccionará un número ganador al azar entre los <strong>1.204 números</strong> emitidos este mes.</div>
+
+    <div class="bombo-wrap">
+      <div class="bombo-circle" id="bomboCircle">
+        <div class="bombo-num" id="bomboNum">?</div>
+      </div>
+    </div>
+
+    <div class="winner-box" id="winnerBox">
+      <div class="winner-label">🏆 Número ganador</div>
+      <div class="winner-name" id="winnerName">—</div>
+      <div class="winner-det" id="winnerDet">—</div>
+    </div>
+
+    <div class="modal-btns" id="sorteo-btns">
+      <button class="mbt-p" id="btnGirar" onclick="girarBombo()">🎲 Girar bombo</button>
+      <button class="mbt-s" onclick="closeSorteo()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Alta Comercio ── -->
+<div class="modal-overlay" id="modalAlta" onclick="closeAltaOut(event)">
+  <div class="modal2">
+    <div class="modal2-title">➕ Nuevo comercio</div>
+    <div class="field-row">
+      <div class="field"><label>Nombre del comercio</label><input type="text" placeholder="Ej: Panadería La Espiga"></div>
+      <div class="field"><label>Rubro</label><select><option>Seleccioná...</option><option>Ferretería</option><option>Farmacia</option><option>Supermercado</option><option>Librería</option><option>Ropa</option><option>Veterinaria</option><option>Otro</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Nombre del responsable</label><input type="text" placeholder="Ej: Juan López"></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" placeholder="+54 9 249..."></div>
+    </div>
+    <div class="field"><label>Dirección</label><input type="text" placeholder="Ej: Av. España 1234, Tandil"></div>
+    <div class="field-row">
+      <div class="field"><label>Email</label><input type="email" placeholder="comercio@email.com"></div>
+      <div class="field"><label>Valor mínimo por número ($)</label><input type="number" placeholder="2000" value="2000"></div>
+    </div>
+    <div class="modal-btns" style="margin-top:8px">
+      <button class="mbt-p" onclick="closeAlta()">✓ Dar de alta</button>
+      <button class="mbt-s" onclick="closeAlta()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Countdown
+function updateCD(){
+  const now = new Date();
+  const target = new Date('2026-07-31T20:00:00');
+  const diff = target - now;
+  if(diff<=0) return;
+  document.getElementById('cd-d').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+}
+updateCD(); setInterval(updateCD, 30000);
+
+// Sorteo modal
+function openSorteo(){ document.getElementById('modalSorteo').classList.add('open'); resetSorteo(); }
+function closeSorteo(){ document.getElementById('modalSorteo').classList.remove('open'); }
+function closeSorteoOut(e){ if(e.target===document.getElementById('modalSorteo')) closeSorteo(); }
+
+const clientes = [
+  {nombre:'María González', comercio:'Ferretería El Tornillo'},
+  {nombre:'Carlos Pérez',   comercio:'Farmacia Central'},
+  {nombre:'Laura Ríos',     comercio:'Librería El Saber'},
+  {nombre:'Roberto Sosa',   comercio:'Veterinaria Patas'},
+  {nombre:'Ana Martínez',   comercio:'Supermercado Díaz'},
+  {nombre:'Diego Fernández',comercio:'Ferretería El Tornillo'},
+  {nombre:'Sofía Herrera',  comercio:'Farmacia Central'},
+];
+
+let girando = false;
+let fase = 0; // 0=inicio, 1=girando, 2=resultado
+
+function resetSorteo(){
+  fase = 0; girando = false;
+  document.getElementById('bomboNum').textContent = '?';
+  document.getElementById('bomboNum').classList.remove('reveal');
+  document.getElementById('bomboCircle').classList.remove('spin');
+  document.getElementById('winnerBox').classList.remove('show');
+  document.getElementById('sorteo-sub').innerHTML = 'Se seleccionará un número ganador al azar entre los <strong>1.204 números</strong> emitidos este mes.';
+  document.getElementById('btnGirar').textContent = '🎲 Girar bombo';
+  document.getElementById('btnGirar').onclick = girarBombo;
+}
+
+function girarBombo(){
+  if(girando) return;
+  girando = true;
+  const circle = document.getElementById('bomboCircle');
+  const num    = document.getElementById('bomboNum');
+
+  // Animar números random
+  let count = 0;
+  const interval = setInterval(()=>{
+    num.textContent = String(Math.floor(Math.random()*9999)).padStart(4,'0');
+    circle.classList.toggle('spin');
+    count++;
+    if(count >= 14){
+      clearInterval(interval);
+      // Elegir ganador
+      const ganador = Math.floor(Math.random()*9999)+1;
+      const cliente = clientes[Math.floor(Math.random()*clientes.length)];
+      num.textContent = String(ganador).padStart(4,'0');
+      num.classList.add('reveal');
+      document.getElementById('winnerName').textContent = `Nº ${String(ganador).padStart(4,'0')} — ${cliente.nombre}`;
+      document.getElementById('winnerDet').textContent  = `Compró en ${cliente.comercio}`;
+      document.getElementById('winnerBox').classList.add('show');
+      document.getElementById('sorteo-sub').textContent = '¡Tenemos ganador! Notificá al cliente por WhatsApp.';
+      document.getElementById('btnGirar').textContent = '📲 Notificar ganador';
+      document.getElementById('btnGirar').onclick = ()=>{ alert('Notificación enviada por WhatsApp ✓'); closeSorteo(); };
+      girando = false;
+    }
+  }, 120);
+}
+
+// Alta comercio modal
+function openAlta(){  document.getElementById('modalAlta').classList.add('open'); }
+function closeAlta(){ document.getElementById('modalAlta').classList.remove('open'); }
+function closeAltaOut(e){ if(e.target===document.getElementById('modalAlta')) closeAlta(); }
+</script>
+</body>
+</html>

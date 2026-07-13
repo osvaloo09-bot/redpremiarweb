@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Comercios — Sorteo Mensual</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --azul:      #1A2E4A;
+    --dorado:    #C9922A;
+    --dorado-claro: #F0C96B;
+    --crema:     #F7F3EC;
+    --gris:      #6B7280;
+    --blanco:    #FFFFFF;
+    --verde:     #2E7D5E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #E8E4DC;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  /* Simulación de celular */
+  .phone-frame {
+    width: 375px;
+    min-height: 700px;
+    background: var(--crema);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 0 0 10px #1a1a1a, inset 0 0 0 2px #333;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Notch */
+  .notch {
+    width: 120px;
+    height: 28px;
+    background: #1a1a1a;
+    border-radius: 0 0 18px 18px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Pantalla 1: Escaneo / Bienvenida del comercio */
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    padding: 0;
+  }
+  .screen.active { display: flex; }
+
+  /* Header del comercio */
+  .store-header {
+    background: var(--azul);
+    padding: 20px 24px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .store-header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: 0; right: 0;
+    height: 40px;
+    background: var(--crema);
+    border-radius: 40px 40px 0 0;
+  }
+  .store-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(201,146,42,0.2);
+    border: 1px solid var(--dorado);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--dorado-claro);
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .store-badge span { font-size: 14px; }
+  .store-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--blanco);
+    line-height: 1.15;
+  }
+  .store-category {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+  }
+
+  /* Cuerpo */
+  .screen-body {
+    padding: 32px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 8px;
+  }
+
+  /* Campo de formulario */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--azul);
+  }
+  .field input {
+    background: var(--blanco);
+    border: 1.5px solid #D6CEBC;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    color: var(--azul);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--dorado); }
+  .field input::placeholder { color: #B0A89A; }
+
+  /* Monto de compra */
+  .amount-box {
+    background: var(--blanco);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1.5px solid #D6CEBC;
+  }
+  .amount-label { font-size: 13px; color: var(--gris); }
+  .amount-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--azul);
+  }
+  .amount-value span { font-size: 14px; color: var(--gris); margin-right: 2px; }
+
+  /* Botón principal */
+  .btn-primary {
+    background: var(--dorado);
+    color: var(--blanco);
+    border: none;
+    border-radius: 16px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary:active { transform: scale(0.98); background: #b5811f; }
+
+  .terms {
+    font-size: 11px;
+    color: var(--gris);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* =================== PANTALLA 2: Número asignado =================== */
+  .result-header {
+    background: var(--azul);
+    padding: 24px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-header::before {
+    content: '★';
+    position: absolute;
+    font-size: 200px;
+    color: rgba(201,146,42,0.08);
+    top: -40px; left: -30px;
+    line-height: 1;
+  }
+  .result-header::after {
+    content: '';
+    position: absolute;
+    bottom: -24px; left: 0; right: 0;
+    height: 48px;
+    background: var(--crema);
+    border-radius: 40px 40px 0 0;
+  }
+  .result-tag {
+    display: inline-block;
+    background: rgba(201,146,42,0.15);
+    border: 1px solid var(--dorado);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    color: var(--dorado-claro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 16px;
+    position: relative; z-index: 1;
+  }
+  .result-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+    margin-bottom: 8px;
+    position: relative; z-index: 1;
+  }
+
+  /* Número grande — firma visual del diseño */
+  .big-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 88px;
+    font-weight: 800;
+    color: var(--blanco);
+    line-height: 1;
+    letter-spacing: -4px;
+    position: relative; z-index: 1;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .big-number-sub {
+    font-size: 13px;
+    color: var(--dorado-claro);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative; z-index: 1;
+  }
+
+  .result-body {
+    padding: 32px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+  }
+
+  /* Card de info */
+  .info-card {
+    background: var(--blanco);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #F0EAE0;
+  }
+  .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .info-row-label { font-size: 13px; color: var(--gris); }
+  .info-row-value { font-size: 14px; font-weight: 600; color: var(--azul); }
+
+  /* Countdown sorteo */
+  .countdown-box {
+    background: linear-gradient(135deg, var(--azul), #2A4A72);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .countdown-icon { font-size: 28px; }
+  .countdown-text { flex: 1; }
+  .countdown-text p { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
+  .countdown-days {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dorado-claro);
+  }
+
+  /* Mis números acumulados */
+  .mis-numeros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .num-chip {
+    background: var(--blanco);
+    border: 1.5px solid var(--dorado);
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dorado);
+  }
+  .num-chip.active {
+    background: var(--dorado);
+    color: var(--blanco);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--azul);
+    border: 1.5px solid #D6CEBC;
+    border-radius: 16px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .btn-secondary:active { background: #EDE8DF; }
+
+  /* Nav demo */
+  .demo-nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--blanco);
+    border-top: 1px solid #EDE8DF;
+  }
+  .demo-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .demo-btn.on  { background: var(--azul); color: var(--blanco); }
+  .demo-btn.off { background: #EDE8DF; color: var(--gris); }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="notch"></div>
+
+  <!-- ===== PANTALLA 1: El cliente escanea el QR ===== -->
+  <div class="screen active" id="screen1">
+    <div class="store-header">
+      <div class="store-badge"><span>✦</span> Red Comercios Tandil</div>
+      <div class="store-name">Ferretería<br>El Tornillo</div>
+      <div class="store-category">Comercio adherido · ID #0042</div>
+    </div>
+
+    <div class="screen-body">
+      <div>
+        <div class="section-label">Tu participación</div>
+        <div class="amount-box">
+          <div>
+            <div class="amount-label">Monto de compra</div>
+          </div>
+          <div class="amount-value"><span>$</span>4.850</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" placeholder="Ej: María González" value="María González">
+      </div>
+
+      <div class="field">
+        <label>WhatsApp</label>
+        <input type="tel" placeholder="+54 9 249..." value="+54 9 2494 123456">
+      </div>
+
+      <button class="btn-primary" onclick="goTo('screen2')">
+        ¡Quiero mi número! →
+      </button>
+
+      <div class="terms">
+        Al continuar aceptás las bases del sorteo mensual.<br>
+        Un número por cada $2.000 de compra.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA 2: Número asignado ===== -->
+  <div class="screen" id="screen2">
+    <div class="result-header">
+      <div class="result-tag">✦ ¡Número asignado!</div>
+      <div class="result-title">Tu número de sorteo es</div>
+      <div class="big-number" id="bigNum">—</div>
+      <div class="big-number-sub">Sorteo · Julio 2026</div>
+    </div>
+
+    <div class="result-body">
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-row-label">Comercio</span>
+          <span class="info-row-value">Ferretería El Tornillo</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Compra registrada</span>
+          <span class="info-row-value">$4.850</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Números obtenidos hoy</span>
+          <span class="info-row-value">2 números</span>
+        </div>
+      </div>
+
+      <div class="countdown-box">
+        <div class="countdown-icon">🗓️</div>
+        <div class="countdown-text">
+          <p>Faltan para el sorteo</p>
+          <div class="countdown-days">2 días · 31 de julio</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Todos mis números este mes</div>
+        <div class="mis-numeros">
+          <div class="num-chip">1.204</div>
+          <div class="num-chip active" id="chip2">—</div>
+          <div class="num-chip active" id="chip3">—</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="goTo('screen1')">
+        Compartir en WhatsApp 📲
+      </button>
+      <button class="btn-secondary" onclick="goTo('screen1')">
+        Volver al inicio
+      </button>
+    </div>
+  </div>
+
+  <!-- Nav de demo -->
+  <div class="demo-nav">
+    <button class="demo-btn on" id="nav1" onclick="goTo('screen1')">① Escanear QR</button>
+    <button class="demo-btn off" id="nav2" onclick="goTo('screen2')">② Número asignado</button>
+  </div>
+</div>
+
+<script>
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  const n1 = rand(1000, 9999);
+  const n2 = rand(1000, 9999);
+
+  document.getElementById('bigNum').textContent  = n1.toLocaleString('es-AR');
+  document.getElementById('chip2').textContent   = n1.toLocaleString('es-AR');
+  document.getElementById('chip3').textContent   = n2.toLocaleString('es-AR');
+
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    document.getElementById('nav1').className = 'demo-btn ' + (id === 'screen1' ? 'on' : 'off');
+    document.getElementById('nav2').className = 'demo-btn ' + (id === 'screen2' ? 'on' : 'off');
+
+    if (id === 'screen2') {
+      const el = document.getElementById('bigNum');
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both';
+    }
+  }
+</script>
+</body>
+</html>

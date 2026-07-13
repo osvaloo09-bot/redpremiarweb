@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Comerciante — Red Comercios</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --azul:        #1A2E4A;
+  --azul-mid:    #2A4A72;
+  --dorado:      #C9922A;
+  --dorado-cl:   #F0C96B;
+  --crema:       #F7F3EC;
+  --bg:          #EDEAE3;
+  --blanco:      #FFFFFF;
+  --gris:        #6B7280;
+  --gris-cl:     #D1CCC2;
+  --verde:       #2E7D5E;
+  --verde-cl:    #D1EDE5;
+  --rojo:        #C0392B;
+  --rojo-cl:     #FADBD8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--azul);
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 240px;
+  background: var(--azul);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-logo {
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.logo-badge {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dorado-cl);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.logo-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--blanco);
+  line-height: 1.2;
+}
+
+.sidebar-store {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.store-id {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+}
+.store-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blanco);
+}
+.store-cat {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+
+.nav { padding: 16px 12px; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: rgba(255,255,255,0.07); color: var(--blanco); }
+.nav-item.active { background: rgba(201,146,42,0.18); color: var(--dorado-cl); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.qr-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--dorado);
+  border-radius: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blanco);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  transition: background 0.15s;
+}
+.qr-btn:hover { background: #b5811f; }
+
+/* ── Main ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar {
+  background: var(--blanco);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gris-cl);
+}
+.topbar-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.mes-badge {
+  background: var(--crema);
+  border: 1px solid var(--gris-cl);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--azul);
+}
+.avatar {
+  width: 36px; height: 36px;
+  background: var(--azul);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blanco);
+}
+
+.content { padding: 28px 32px; overflow-y: auto; flex: 1; }
+
+/* ── Stat cards ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--blanco);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card.highlight {
+  background: var(--azul);
+}
+.stat-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gris);
+  margin-bottom: 8px;
+}
+.stat-card.highlight .stat-eyebrow { color: rgba(255,255,255,0.5); }
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--azul);
+  line-height: 1;
+}
+.stat-card.highlight .stat-value { color: var(--blanco); }
+.stat-sub {
+  font-size: 12px;
+  color: var(--gris);
+  margin-top: 6px;
+}
+.stat-card.highlight .stat-sub { color: rgba(255,255,255,0.5); }
+.stat-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.trend-up   { background: var(--verde-cl); color: var(--verde); }
+.trend-down { background: var(--rojo-cl);  color: var(--rojo);  }
+.stat-accent {
+  position: absolute;
+  bottom: -10px; right: -10px;
+  font-size: 64px;
+  opacity: 0.07;
+}
+.stat-card.highlight .stat-accent { opacity: 0.12; }
+
+/* ── Dos columnas ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* ── Tabla clientes ── */
+.panel {
+  background: var(--blanco);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.panel-header {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #F0EAE0;
+}
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.panel-action {
+  font-size: 13px;
+  color: var(--dorado);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.search-bar {
+  padding: 12px 24px;
+  border-bottom: 1px solid #F0EAE0;
+}
+.search-bar input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--gris-cl);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: var(--azul);
+  outline: none;
+}
+.search-bar input:focus { border-color: var(--dorado); }
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 10px 24px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gris);
+  background: #FAFAF8;
+  border-bottom: 1px solid #F0EAE0;
+}
+tbody tr {
+  border-bottom: 1px solid #F7F3EC;
+  transition: background 0.12s;
+  cursor: pointer;
+}
+tbody tr:hover { background: #FDFCFA; }
+tbody tr:last-child { border-bottom: none; }
+td { padding: 12px 24px; font-size: 13px; }
+
+.client-name { font-weight: 600; color: var(--azul); }
+.client-phone { color: var(--gris); font-size: 12px; }
+.nums-cell { display: flex; gap: 5px; flex-wrap: wrap; }
+.num-tag {
+  background: var(--crema);
+  border: 1px solid var(--gris-cl);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Syne', sans-serif;
+  color: var(--azul);
+}
+.num-tag.new {
+  background: rgba(201,146,42,0.12);
+  border-color: var(--dorado);
+  color: var(--dorado);
+}
+.date-cell { color: var(--gris); font-size: 12px; }
+.amount-cell { font-weight: 600; font-family: 'Syne', sans-serif; }
+
+/* ── Panel derecho: sorteo + actividad ── */
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+.sorteo-card {
+  background: linear-gradient(145deg, var(--azul), var(--azul-mid));
+  border-radius: 16px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.sorteo-card::before {
+  content: '🎰';
+  position: absolute;
+  font-size: 100px;
+  bottom: -20px; right: -10px;
+  opacity: 0.12;
+}
+.sorteo-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 6px;
+}
+.sorteo-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--blanco);
+  margin-bottom: 16px;
+}
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.countdown-unit {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.countdown-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--dorado-cl);
+  display: block;
+}
+.countdown-lbl {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sorteo-nums {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+.sorteo-nums strong { color: var(--dorado-cl); }
+
+/* Actividad reciente */
+.activity-list { padding: 0; }
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #F7F3EC;
+}
+.activity-item:last-child { border-bottom: none; }
+.act-icon {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.act-icon.compra  { background: var(--verde-cl); }
+.act-icon.nuevo   { background: rgba(201,146,42,0.12); }
+.act-info { flex: 1; }
+.act-name { font-size: 13px; font-weight: 600; }
+.act-desc { font-size: 12px; color: var(--gris); margin-top: 1px; }
+.act-time { font-size: 11px; color: var(--gris); flex-shrink: 0; }
+
+/* ── QR Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,46,74,0.7);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--blanco);
+  border-radius: 24px;
+  padding: 36px 32px;
+  text-align: center;
+  max-width: 340px;
+  width: 90%;
+  animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.modal-sub { font-size: 13px; color: var(--gris); margin-bottom: 24px; }
+
+/* QR SVG simulado */
+.qr-box {
+  width: 180px; height: 180px;
+  margin: 0 auto 20px;
+  border: 3px solid var(--azul);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--blanco);
+}
+.qr-grid {
+  display: grid;
+  grid-template-columns: repeat(10,1fr);
+  gap: 2px;
+  width: 150px; height: 150px;
+}
+.qr-cell {
+  border-radius: 1px;
+  background: var(--azul);
+}
+.qr-cell.w { background: transparent; }
+.modal-id {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gris);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.modal-btns { display: flex; gap: 10px; }
+.modal-btn-p {
+  flex: 1;
+  background: var(--azul);
+  color: var(--blanco);
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.modal-btn-s {
+  flex: 1;
+  background: var(--bg);
+  color: var(--azul);
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">✦ Red Comercios</div>
+      <div class="logo-name">Panel<br>Comerciante</div>
+    </div>
+
+    <div class="sidebar-store">
+      <div class="store-id">ID #0042</div>
+      <div class="store-title">Ferretería El Tornillo</div>
+      <div class="store-cat">Ferretería · Tandil</div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active">
+        <span class="nav-icon">📊</span> Resumen
+      </button>
+      <button class="nav-item">
+        <span class="nav-icon">👥</span> Clientes
+      </button>
+      <button class="nav-item">
+        <span class="nav-icon">🔢</span> Números emitidos
+      </button>
+      <button class="nav-item">
+        <span class="nav-icon">📅</span> Historial sorteos
+      </button>
+      <button class="nav-item">
+        <span class="nav-icon">⚙️</span> Mi comercio
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="qr-btn" onclick="openQR()">
+        <span>⬛</span> Ver mi QR
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Resumen del mes</div>
+      <div class="topbar-right">
+        <div class="mes-badge">📅 Julio 2026</div>
+        <div class="avatar">FT</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card highlight">
+          <div class="stat-eyebrow">Números emitidos</div>
+          <div class="stat-value">148</div>
+          <div class="stat-sub">este mes</div>
+          <div class="stat-trend trend-up">↑ 23% vs junio</div>
+          <div class="stat-accent">🎟️</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-eyebrow">Clientes únicos</div>
+          <div class="stat-value">64</div>
+          <div class="stat-sub">participando</div>
+          <div class="stat-trend trend-up">↑ 8 nuevos</div>
+          <div class="stat-accent">👤</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-eyebrow">Ventas registradas</div>
+          <div class="stat-value">$312K</div>
+          <div class="stat-sub">total del mes</div>
+          <div class="stat-trend trend-up">↑ 18%</div>
+          <div class="stat-accent">💰</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-eyebrow">Ticket promedio</div>
+          <div class="stat-value">$4.875</div>
+          <div class="stat-sub">por compra</div>
+          <div class="stat-trend trend-down">↓ 3%</div>
+          <div class="stat-accent">🧾</div>
+        </div>
+      </div>
+
+      <!-- Dos columnas -->
+      <div class="two-col">
+
+        <!-- Tabla clientes -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Clientes del mes</div>
+            <button class="panel-action">Exportar →</button>
+          </div>
+          <div class="search-bar">
+            <input type="text" placeholder="Buscar cliente o número...">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Números</th>
+                <th>Última compra</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="client-name">María González</div>
+                  <div class="client-phone">+54 9 2494 123456</div>
+                </td>
+                <td>
+                  <div class="nums-cell">
+                    <span class="num-tag">1.204</span>
+                    <span class="num-tag new">3.891</span>
+                    <span class="num-tag new">3.892</span>
+                  </div>
+                </td>
+                <td class="date-cell">Hoy 14:32</td>
+                <td class="amount-cell">$4.850</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="client-name">Carlos Pérez</div>
+                  <div class="client-phone">+54 9 2494 234567</div>
+                </td>
+                <td>
+                  <div class="nums-cell">
+                    <span class="num-tag">0.822</span>
+                    <span class="num-tag">2.410</span>
+                  </div>
+                </td>
+                <td class="date-cell">Hoy 11:15</td>
+                <td class="amount-cell">$3.200</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="client-name">Laura Ríos</div>
+                  <div class="client-phone">+54 9 2494 345678</div>
+                </td>
+                <td>
+                  <div class="nums-cell">
+                    <span class="num-tag">1.559</span>
+                    <span class="num-tag">1.560</span>
+                    <span class="num-tag">1.561</span>
+                    <span class="num-tag">1.562</span>
+                  </div>
+                </td>
+                <td class="date-cell">Ayer 16:48</td>
+                <td class="amount-cell">$9.100</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="client-name">Roberto Sosa</div>
+                  <div class="client-phone">+54 9 2494 456789</div>
+                </td>
+                <td>
+                  <div class="nums-cell">
+                    <span class="num-tag">0.311</span>
+                  </div>
+                </td>
+                <td class="date-cell">26 jul</td>
+                <td class="amount-cell">$2.400</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="client-name">Ana Martínez</div>
+                  <div class="client-phone">+54 9 2494 567890</div>
+                </td>
+                <td>
+                  <div class="nums-cell">
+                    <span class="num-tag">2.788</span>
+                    <span class="num-tag">2.789</span>
+                  </div>
+                </td>
+                <td class="date-cell">25 jul</td>
+                <td class="amount-cell">$5.600</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="client-name">Diego Fernández</div>
+                  <div class="client-phone">+54 9 2494 678901</div>
+                </td>
+                <td>
+                  <div class="nums-cell">
+                    <span class="num-tag">0.944</span>
+                    <span class="num-tag">0.945</span>
+                    <span class="num-tag">0.946</span>
+                  </div>
+                </td>
+                <td class="date-cell">24 jul</td>
+                <td class="amount-cell">$7.200</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Columna derecha -->
+        <div class="right-col">
+
+          <!-- Sorteo countdown -->
+          <div class="sorteo-card">
+            <div class="sorteo-label">Próximo sorteo</div>
+            <div class="sorteo-title">Sorteo Julio 2026</div>
+            <div class="countdown-grid">
+              <div class="countdown-unit">
+                <span class="countdown-num">02</span>
+                <span class="countdown-lbl">Días</span>
+              </div>
+              <div class="countdown-unit">
+                <span class="countdown-num">14</span>
+                <span class="countdown-lbl">Horas</span>
+              </div>
+              <div class="countdown-unit">
+                <span class="countdown-num">38</span>
+                <span class="countdown-lbl">Min</span>
+              </div>
+            </div>
+            <div class="sorteo-nums">
+              Tu comercio aportó <strong>148 números</strong> de 1.204 totales en la red
+            </div>
+          </div>
+
+          <!-- Actividad reciente -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Actividad reciente</div>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="act-icon compra">🛒</div>
+                <div class="act-info">
+                  <div class="act-name">María González</div>
+                  <div class="act-desc">Compra $4.850 · 2 números</div>
+                </div>
+                <div class="act-time">14:32</div>
+              </div>
+              <div class="activity-item">
+                <div class="act-icon compra">🛒</div>
+                <div class="act-info">
+                  <div class="act-name">Carlos Pérez</div>
+                  <div class="act-desc">Compra $3.200 · 1 número</div>
+                </div>
+                <div class="act-time">11:15</div>
+              </div>
+              <div class="activity-item">
+                <div class="act-icon nuevo">⭐</div>
+                <div class="act-info">
+                  <div class="act-name">Nuevo cliente</div>
+                  <div class="act-desc">Sofía Herrera se registró</div>
+                </div>
+                <div class="act-time">10:04</div>
+              </div>
+              <div class="activity-item">
+                <div class="act-icon compra">🛒</div>
+                <div class="act-info">
+                  <div class="act-name">Laura Ríos</div>
+                  <div class="act-desc">Compra $9.100 · 4 números</div>
+                </div>
+                <div class="act-time">Ayer</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- ── Modal QR ── -->
+<div class="modal-overlay" id="qrModal" onclick="closeQR(event)">
+  <div class="modal">
+    <div class="modal-title">Tu código QR</div>
+    <div class="modal-sub">Mostralo en tu local para que los clientes escaneen</div>
+
+    <div class="qr-box">
+      <!-- QR simulado con celdas -->
+      <div class="qr-grid" id="qrGrid"></div>
+    </div>
+
+    <div class="modal-id">COMERCIO ID #0042 · RED TANDIL</div>
+
+    <div class="modal-btns">
+      <button class="modal-btn-p">⬇ Descargar</button>
+      <button class="modal-btn-s" onclick="closeQRBtn()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Generar QR visual aleatorio pero con esquinas fijas
+const grid = document.getElementById('qrGrid');
+const CELLS = 10;
+// Patrón de esquinas (posición de celdas fijas en negro)
+const corners = new Set();
+// Esquina sup-izq
+for(let r=0;r<3;r++) for(let c=0;c<3;c++) corners.add(r*CELLS+c);
+// Esquina sup-der
+for(let r=0;r<3;r++) for(let c=7;c<10;c++) corners.add(r*CELLS+c);
+// Esquina inf-izq
+for(let r=7;r<10;r++) for(let c=0;c<3;c++) corners.add(r*CELLS+c);
+
+for(let i=0;i<CELLS*CELLS;i++){
+  const cell = document.createElement('div');
+  if(corners.has(i)){
+    cell.className = 'qr-cell';
+  } else {
+    cell.className = 'qr-cell' + (Math.random() > 0.45 ? '' : ' w');
+  }
+  grid.appendChild(cell);
+}
+
+// Countdown dinámico
+function updateCountdown(){
+  const now = new Date();
+  const target = new Date('2026-07-31T20:00:00');
+  const diff = target - now;
+  if(diff <= 0) return;
+  const days  = Math.floor(diff/86400000);
+  const hours = Math.floor((diff%86400000)/3600000);
+  const mins  = Math.floor((diff%3600000)/60000);
+  const nums = document.querySelectorAll('.countdown-num');
+  if(nums[0]) nums[0].textContent = String(days).padStart(2,'0');
+  if(nums[1]) nums[1].textContent = String(hours).padStart(2,'0');
+  if(nums[2]) nums[2].textContent = String(mins).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 30000);
+
+function openQR(){ document.getElementById('qrModal').classList.add('open'); }
+function closeQRBtn(){ document.getElementById('qrModal').classList.remove('open'); }
+function closeQR(e){ if(e.target===document.getElementById('qrModal')) closeQRBtn(); }
+</script>
+</body>
+</html>
